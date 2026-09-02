@@ -20,12 +20,12 @@ import java.util.List;
         version = "1.0.0",
         authors = {"HubLogin"}
 )
-public final class HubVelocityPlugin {
+public final class HubLoginPlugin {
 
     private final ProxyServer proxy;
 
     @Inject
-    public HubVelocityPlugin(ProxyServer proxy) {
+    public HubLoginPlugin(ProxyServer proxy) {
         this.proxy = proxy;
     }
 
@@ -48,7 +48,7 @@ public final class HubVelocityPlugin {
 
             if (!(invocation.source() instanceof Player player)) {
                 invocation.source().sendMessage(
-                        Component.text("Ta komenda jest tylko dla graczy.")
+                        Component.text("Ta komenda jest dostępna tylko dla graczy.")
                 );
                 return;
             }
@@ -58,7 +58,7 @@ public final class HubVelocityPlugin {
             proxy.getServer("hub1").ifPresent(hubs::add);
             proxy.getServer("hub2").ifPresent(hubs::add);
 
-            // Losowa kolejność hub1/hub2
+            // Losujemy kolejność hubów.
             Collections.shuffle(hubs);
 
             connectToHub(player, hubs, 0);
@@ -70,6 +70,7 @@ public final class HubVelocityPlugin {
                 int index
         ) {
 
+            // Nie ma już żadnego dostępnego lobby.
             if (index >= hubs.size()) {
 
                 player.disconnect(
@@ -87,11 +88,12 @@ public final class HubVelocityPlugin {
                     .connect()
                     .whenComplete((result, error) -> {
 
+                        // Jeżeli połączenie się nie udało,
+                        // próbujemy następne lobby.
                         if (error != null
                                 || result == null
                                 || !result.isSuccessful()) {
 
-                            // Pierwszy hub nie działa → próbujemy drugi
                             connectToHub(player, hubs, index + 1);
                         }
                     });
