@@ -1,4 +1,4 @@
-package pl.hublogin;
+package pl.hubvelocity;
 
 import com.google.inject.Inject;
 import com.velocitypowered.api.command.SimpleCommand;
@@ -15,17 +15,17 @@ import java.util.Collections;
 import java.util.List;
 
 @Plugin(
-        id = "hublogin",
-        name = "HubLogin",
+        id = "hubvelocity",
+        name = "HubVelocityPlugin",
         version = "1.0.0",
-        authors = {"HubLogin"}
+        authors = {"HubVelocity"}
 )
-public final class HubLoginPlugin {
+public final class HubVelocityPlugin {
 
     private final ProxyServer proxy;
 
     @Inject
-    public HubLoginPlugin(ProxyServer proxy) {
+    public HubVelocityPlugin(ProxyServer proxy) {
         this.proxy = proxy;
     }
 
@@ -35,7 +35,6 @@ public final class HubLoginPlugin {
         proxy.getCommandManager().register(
                 proxy.getCommandManager()
                         .metaBuilder("hub")
-                        .aliases("lobby")
                         .build(),
                 new HubCommand()
         );
@@ -58,7 +57,7 @@ public final class HubLoginPlugin {
             proxy.getServer("hub1").ifPresent(hubs::add);
             proxy.getServer("hub2").ifPresent(hubs::add);
 
-            // Losujemy kolejność hubów.
+            // Losowa kolejność hub1/hub2
             Collections.shuffle(hubs);
 
             connectToHub(player, hubs, 0);
@@ -70,7 +69,7 @@ public final class HubLoginPlugin {
                 int index
         ) {
 
-            // Nie ma już żadnego dostępnego lobby.
+            // Nie znaleziono żadnego lobby
             if (index >= hubs.size()) {
 
                 player.disconnect(
@@ -88,8 +87,8 @@ public final class HubLoginPlugin {
                     .connect()
                     .whenComplete((result, error) -> {
 
-                        // Jeżeli połączenie się nie udało,
-                        // próbujemy następne lobby.
+                        // Jeśli hub jest wyłączony lub połączenie się nie udało,
+                        // próbujemy następny.
                         if (error != null
                                 || result == null
                                 || !result.isSuccessful()) {
