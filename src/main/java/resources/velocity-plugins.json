@@ -1,1 +1,9 @@
-
+{
+  "id": "hubvelocity",
+  "name": "HubVelocityPlugin",
+  "version": "1.0.0",
+  "main": "pl.hubvelocity.HubVelocityPlugin",
+  "authors": [
+    "HubVelocity"
+  ]
+}
