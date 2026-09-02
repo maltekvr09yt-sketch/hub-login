@@ -1,52 +1,32 @@
-name: Automatyczny Build i Release
+name: Build HubVelocityPlugin
 
 on:
   push:
-    tags:
-      - 'v*' # Uruchomi się po wypchnięciu tagu wersji, np. v1.0.0
-
-permissions:
-  contents: write # Wymagane uprawnienie do stworzenia Release i dodania pliku JAR
+    branches:
+      - main
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Klonowanie repozytorium
-      - name: Pobierz kod z repozytorium
+      - name: Pobierz kod
         uses: actions/checkout@v4
 
-      # 2. Podgląd plików w logach (w razie problemów od razu widać strukturę)
-      - name: Pokaz dostepne pliki
-        run: ls -la
-
-      # 3. Dynamiczne szukanie i rozpakowanie pliku ZIP
-      - name: Rozpakuj archiwum ZIP
-        run: |
-          mkdir -p project
-          # Szuka dowolnego pliku .zip w głównym katalogu
-          ZIP_FILE=$(find . -maxdepth 1 -name "*.zip" | head -n 1)
-          if [ -z "$ZIP_FILE" ]; then
-            echo "ERROR: Nie znaleziono zadnego pliku .zip!"
-            exit 1
-          fi
-          echo "Znaleziono i rozpakowuje: $ZIP_FILE"
-          unzip -o "$ZIP_FILE" -d project
-
-      # 4. Przepakowanie zawartości do działającego pliku JAR dla Minecrafta
-      - name: Stworz poprawny plik JAR
-        run: |
-          cd project
-          # Pakuje pliki (plugin.yml, klasy, META-INF) bezpośrednio do archiwum .jar
-          zip -r ../hub-login.jar ./*
-          cd ..
-
-      # 5. Publikacja w GitHub Releases
-      - name: Utwórz GitHub Release i prześlij plik JAR
-        uses: softprops/action-gh-release@v2
+      - name: Ustaw Javę 21
+        uses: actions/setup-java@v4
         with:
-          files: hub-login.jar # Wrzuca wygenerowany plik prosto do zakładki wydań
-          generate_release_notes: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          distribution: temurin
+          java-version: '21'
+
+      - name: Zbuduj plugin
+        run: |
+          chmod +x gradlew
+          ./gradlew build
+
+      - name: Udostępnij plik JAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: HubVelocityPlugin
+          path: build/libs/*.jar
